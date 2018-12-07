@@ -22,9 +22,9 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
         //accumulate squared residuals
         for(int i=0; i < estimations.size(); ++i){
             // ... your code here
-            VectorXd diff(4);
-            diff = (estimations[i]-ground_truth[i]);
-            rmse = rmse.array() + diff.array()*diff.array();
+            VectorXd diff = (estimations[i]-ground_truth[i]);
+            diff = diff.array()*diff.array();
+            rmse += diff;
         }
 
         //calculate the mean
@@ -46,32 +46,29 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   */
     MatrixXd Hj(3,4);
     //recover state parameters
-    float px = x_state(0);
-    float py = x_state(1);
-    float vx = x_state(2);
-    float vy = x_state(3);
+    double px = x_state(0);
+    double py = x_state(1);
+    double vx = x_state(2);
+    double vy = x_state(3);
 
-    float px2py2 = std::pow(px,2) + std::pow(py,2);
+    float c1 = std::pow(px,2) + std::pow(py,2);
 
-    //check division by zero
-    if(px2py2 == 0) {
+    if(fabs(c1) < 0.0001){
         cout << "CalculateJacobian () - Error - Division by Zero" << endl;
-        // Set px2pxy2 to a very small number
-        px2py2 = 0.0001;
+        // Increment px and py by a small amount
+        px += .001;
+        py += .001;
+
+        // Re-evaluate c1
+        c1 = std::pow(px,2) + std::pow(py,2);
     }
 
-    float px_div_px2py2 = px/std::sqrt(px2py2);
-    float py_div_px2py2 = py/std::sqrt(px2py2);
+    float c2 = sqrt(c1);
+    float c3 = (c1*c2);
 
-    //compute the Jacobian matrix
-    Hj << px_div_px2py2, py_div_px2py2, 0, 0,
-            -py/(px2py2), px/(px2py2), 0, 0,
-            (py*(vx*py-vy*px))/std::pow(px2py2, 3/2), (px*(vy*px-vx*py))/std::pow(px2py2, 3/2), px_div_px2py2, py_div_px2py2;
-    /*
-//        Hj << px/std::sqrt((std::pow(px,2) + std::pow(py,2))), py/std::sqrt((std::pow(px,2) + std::pow(py,2))), 0, 0,
-//              -py/(std::pow(px,2) + std::pow(py,2)), px/(std::pow(px,2) + std::pow(py,2)), 0, 0,
-//              (py*(vx*py-vy*px))/std::pow((std::pow(px,2) + std::pow(py,2)), 3/2), (px*(vy*px-vx*py))/std::pow((std::pow(px,2) + std::pow(py,2)), 3/2), px/std::sqrt((std::pow(px,2) + std::pow(py,2))), py/std::sqrt((std::pow(px,2) + std::pow(py,2)));
-    */
+    Hj << (px/c2), (py/c2), 0, 0,
+            -(py/c1), (px/c1), 0, 0,
+            py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
 
     return Hj;
 }
