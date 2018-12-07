@@ -52,6 +52,12 @@ public:
    */
   void Predict();
 
+  /***
+   * Updates the state by using the common Kalman Filter equations
+   * @param y The value of the y equation
+   */
+  void UpdateCommon(const Eigen::VectorXd &y);
+
   /**
    * Updates the state by using standard Kalman Filter equations
    * @param z The measurement at k+1
