@@ -26,7 +26,8 @@ void KalmanFilter::Predict() {
     * predict the state
   */
   x_ = F_ * x_;
-  P_ = F_ * P_ * F_.transpose() + Q_;
+  MatrixXd Ft = F_.transpose();
+  P_ = F_ * P_ * Ft + Q_;
 }
 
 void KalmanFilter::UpdateCommon(const VectorXd &y) {
@@ -59,20 +60,37 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     * update the state by using Extended Kalman Filter equations
   */
   // Convert x_ to polar
-  float px = x_(0);
-  float py = x_(1);
-  float vx = x_(2);
-  float vy = x_(3);
+  double px = x_(0);
+  double py = x_(1);
+  double vx = x_(2);
+  double vy = x_(3);
 
   VectorXd h = VectorXd(3);
-  float sqrt_py2px2 = sqrt((pow(px,2) + pow(py,2)));
-  h << sqrt_py2px2, atan2(py,px), (px*vx + py*vy) / sqrt_py2px2;
+  double sqrt_py2px2 = sqrt((pow(px,2) + pow(py,2)));
+
+  // Check div by zero
+  if(sqrt_py2px2 < 0.0001) {
+      // Increment px and py by a small amount
+      px += 0.0001;
+      py += 0.0001;
+
+      // Re-evaluate sqrt_py2px2
+      sqrt_py2px2 = sqrt((pow(px,2) + pow(py,2)));
+  }
+
+  h << sqrt_py2px2,
+       atan2(py,px),
+       (px*vx + py*vy) / sqrt_py2px2;
 
   VectorXd y = z - h;
 
   // Check that the angle y(1) is > -pi and < pi, else convert to between -pi and pi by removing multiples of pi
-  if(y(1) > M_PI || y(1) < -M_PI) {
-    y(1) = fmod(y(1), M_PI);
+  while ( y(1) > M_PI || y(1) < -M_PI ) {
+    if ( y(1) > M_PI ) {
+        y(1) -= 2 * M_PI;
+    } else {
+        y(1) += 2 * M_PI;
+    }
   }
 
     // Update state
