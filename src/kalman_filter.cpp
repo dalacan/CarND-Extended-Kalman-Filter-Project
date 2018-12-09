@@ -68,7 +68,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   VectorXd h = VectorXd(3);
   double sqrt_py2px2 = sqrt((pow(px,2) + pow(py,2)));
 
-  // Check div by zero
+  // Check for division by zero
   if(sqrt_py2px2 < 0.0001) {
       // Increment px and py by a small amount
       px += 0.0001;
@@ -84,7 +84,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   VectorXd y = z - h;
 
-  // Check that the angle y(1) is > -pi and < pi, else convert to between -pi and pi by removing multiples of pi
+  // Check that the angle y(1) is > -pi and < pi, else convert to between -pi and pi by removing multiples of 2 *pi
   while ( y(1) > M_PI || y(1) < -M_PI ) {
     if ( y(1) > M_PI ) {
         y(1) -= 2 * M_PI;

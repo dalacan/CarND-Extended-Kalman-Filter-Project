@@ -53,6 +53,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
     float c1 = std::pow(px,2) + std::pow(py,2);
 
+    // Check for division by zero
     if(fabs(c1) < 0.0001){
         cout << "CalculateJacobian () - Error - Division by Zero" << endl;
         // Increment px and py by a small amount

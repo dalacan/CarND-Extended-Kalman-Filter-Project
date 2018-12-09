@@ -57,13 +57,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       ekf_.x_ = VectorXd(4);
       ekf_.x_ << 1, 1, 1, 1;
 
+      // Initialize F state transition matrix
       ekf_.F_ = MatrixXd(4,4);
       ekf_.F_ << 1, 0, 1, 0,
                  0, 1, 0, 1,
                  0, 0, 1, 0,
                  0, 0, 0, 1;
 
-        // Initial state covariance
+      // Initialize the uncertainty state covariance matrix
       ekf_.P_ = MatrixXd(4, 4);
       ekf_.P_<< 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -112,10 +113,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   double dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
   previous_timestamp_ = measurement_pack.timestamp_;
 
+  // Set the change of time in the state transition matrix
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
-
-
+  
   double noise_ax = 9.0;
   double noise_ay = 9.0;
 
@@ -123,6 +124,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   double dt_4_4 = std::pow(dt,4) / 4; //dt^4 / 4
   double dt_3_2 = std::pow(dt,3) / 2; //dt^3 / 2
 
+  // Set the process noise covariance matrix
   ekf_.Q_= MatrixXd(4, 4);
   ekf_.Q_ << dt_4_4*noise_ax, 0, dt_3_2*noise_ax, 0,
           0, dt_4_4*noise_ay, 0, dt_3_2*noise_ay,
