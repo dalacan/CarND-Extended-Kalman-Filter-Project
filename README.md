@@ -1,6 +1,7 @@
-# Extended Kalman Filter Project Starter Code
+# Extended Kalman Filter Project
 Self-Driving Car Engineer Nanodegree Program
 
+## Project outline
 In this project you will utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
 
 This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)
@@ -124,6 +125,59 @@ and how to install it.
 Regardless of the IDE used, every submitted project must
 still be compilable with cmake and make.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+## Implementation Details
 
+The predict and update functions of the Kalman Filter are implemented in the kalman_filter.cpp 
+file. Specifically, the update function includes 3 update functions:
+
+* `Update()`: Updates the state using the kalman filter equation
+* `UpdateEKF()`: Update the state using the extended kalman filter equation
+* `UpdateCommon()`: This function contains common kalman filter equations used by both 
+the `Update()` and `UpdateEKF()` functions.
+
+The FusionEKF.cpp file contains the usage implementation of the Kalman Filter. The code
+* Initializes the Kalman filter depending on the measurement (Lidar or Radar).
+* Calls the `KalmanFilter::Predict()`
+* Calls the `KalmanFilter::Update()` if the measurement is Lidar
+* Calls the `KalmanFilter::UpdateEKF()` if the measurement is Radar
+
+Supporting functions have been implemented in the tools.cpp. These functions are:
+* `CalculateRMSE`: Used to estimate the root mean square error.
+* `CalculateJacobian`: Used to calculate the jacobian matrix for the given (px, py, vx, vy) matrix.
+
+## Test Results
+
+### Dataset 1
+Below is the RMSE test results when the implementation was ran on dataset 1 from the Term 2 simulator.
+
+| X | Y | VX | VY |
+|:---:|:---:|:----:|:----:|
+| 0.0974| 0.0855 | 0.4517 | 0.4404 |
+
+### Dataset 2
+Below is the RMSE test results when the implementation was ran on dataset 2 from the Term 2 simulator.
+
+| X | Y | VX | VY |
+|:---:|:---:|:----:|:----:|
+| 0.0726| 0.0965 | 0.4219 | 0.4937 |
+
+### Radar only
+Below is the RMSE test results (on dataset 1) when only the radar sensor is used.
+
+| X | Y | VX | VY |
+|:---:|:---:|:----:|:----:|
+| 0.2383| 0.3360| 0.5360 | 0.7172
+
+As expected, when compared to dataset 1, the root mean square error is higher across all parameters. Implying a lower
+certainty about the position and velocity.
+
+### Lidar only
+Below is the RMSE test results (on dataset 1) when only the laser sensor is used.
+
+| X | Y | VX | VY |
+|:---:|:---:|:----:|:----:|
+| 0.1840| 0.1543| 0.6056 | 0.4862
+
+As expected, when compared to dataset 1, the root mean square error is higher across all parameters. Implying a lower
+certainty about the position and velocity. Additionally, when compared to the radar test, this results in a lower rmse. 
+This is expected as the Lidar has a higher resolution than radar in when taking positioning measurements.
